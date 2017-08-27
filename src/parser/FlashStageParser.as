@@ -21,15 +21,10 @@ import parser.strategies.SpriteParser;
 import parser.strategies.TextureAtlasVisitor;
 import parser.strategies.UnknownTypeParser;
 
-import visitor.ASFileGeneratorVisitor;
-import visitor.FileDataVO;
-import visitor.IContentVisitor;
-
 public class FlashStageParser {
     private static const VERSION:String = "2.0";
 //    private static var _textureList:TextureList;
     private static var _objectsXML:XML;
-    private static var _visitor:IContentVisitor/* = new ASFileGeneratorVisitor("generated")*/;
 
     private static var _PACKAGE_NAME:String = "generated";
 
@@ -90,27 +85,8 @@ public class FlashStageParser {
         return clipData;
     }
 
-    private static const emptyFileData:FileDataVO = new FileDataVO();
-    public static function exportRecursive(displayObject:DisplayObject, ignoreTotalFrames:Boolean = false, forceName:String = null):FileDataVO {
-
-        var fileData:FileDataVO = emptyFileData;
-
-        //TODO @a.shatalov: нужно специфически обрабатывать стандартные классы. Добавлять потомков в них прямо в конструкторе
-
-        if (displayObject is DisplayObjectContainer) {
-            var container:DisplayObjectContainer = displayObject as DisplayObjectContainer;
-            if (container is MovieClip && ( ignoreTotalFrames || (container as MovieClip).totalFrames > 1 )) {
-                fileData = _visitor.visitMovieClip(container as MovieClip);
-            } else if (container is TextField) {
-                fileData = _visitor.visitTextField();
-            } else if (container is Sprite) {
-                fileData = _visitor.visitSprite(container as Sprite);
-            } //else throw new Error("Unhandled child object " + displayObject.toString());
-        } else if (displayObject is Shape) {
-            fileData = _visitor.visitShape();
-        } else if (displayObject is Bitmap) {
-            fileData = _visitor.visitBitmap();
-        } //TODO обработка MorphShape
+    public static function exportRecursive(displayObject:DisplayObject, ignoreTotalFrames:Boolean = false, forceName:String = null):* {
+        throw new Error("Empty function");
 //        else
 //            throw new Error("Unhandled child object " + displayObject.toString());
 
@@ -238,7 +214,6 @@ public class FlashStageParser {
         }*/
 
 //        _objectsXML.appendChild(objectXML);//тут удалять нельзя. Тут создается общий список всех объектов на сцене
-        return fileData;
     }
 
     public static function parse(displayObject:DisplayObject):IParseStrategy {
