@@ -47,7 +47,7 @@ public class SpriteParser implements IParseStrategy {
 
         for (var i:int = 0; i < _container.numChildren; ++i) {
             var child:DisplayObject = _container.getChildAt(i);
-            var childParseData:IParseStrategy = FlashStageParser.parse(child).execute(externalContext);
+            var childParseData:IParseStrategy = FlashStageParser.parse(child).execute(externalContext + "." +_container.name);
 
 //            _externalConstructor += "\t\tvar " + child.name + ":" + childParseData.type + " = new " + childParseData.type + "();\n";
 //            _externalConstructor += "\n\t\t"+_container.name+".addChild(this." + child.name + ");\n";
