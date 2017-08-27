@@ -230,7 +230,8 @@ public class FlashStageParser {
             var container:DisplayObjectContainer = displayObject as DisplayObjectContainer;
             if (container is MovieClip/* && ( ignoreTotalFrames || (container as MovieClip).totalFrames > 1 )*/) {
 //                return new CustomMovieClipParser(container as MovieClip, _PACKAGE_NAME);
-                return new SpriteParser(container as Sprite);
+//                return new SpriteParser(container as Sprite);
+                return new CustomSpriteParser(container as Sprite, _PACKAGE_NAME);
             } else if (container is TextField) {
                 return new UnknownTypeParser();
             } else if (container is Sprite) {

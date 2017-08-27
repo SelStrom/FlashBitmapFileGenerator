@@ -38,11 +38,12 @@ public class GraphicsParser implements IParseStrategy {
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import openfl.display.Tile;", true);
+        addToImports("import openfl.display.Bitmap;", true);
+        addToImports("import BitmapDataLibrary;", true);
 
         var info:BitmapInfo = _visitor.visitGraphics(_displayObject);
 
-        _externalConstructor = "\n\t\tvar " + _displayObject.name + ": Bitmap = new Bitmap(BitmapDataLibrary.getBitmapDataByName(" + info._name + "));\n";
+        _externalConstructor = "\n\t\tvar " + _displayObject.name + ": Bitmap = new Bitmap(BitmapDataLibrary.getBitmapDataByName(\"" + info._name + "\"));\n";
         _externalConstructor += "\t\t" + externalContext + ".addChild(" + _displayObject.name + ");\n";
         _externalConstructor += createConstructorData(_displayObject);
 

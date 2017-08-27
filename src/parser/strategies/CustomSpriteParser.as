@@ -55,7 +55,7 @@ public class CustomSpriteParser implements IParseStrategy {
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import flash.display.Sprite;", true);
+        addToImports("import openfl.display.Sprite;", true);
 
         _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
 
@@ -71,7 +71,8 @@ public class CustomSpriteParser implements IParseStrategy {
         var fileStream:FileStream = new FileStream();
         fileStream.open(file, FileMode.WRITE);
 
-        _constructor += "\n\tpublic function " + Util.getName(_container) + "() {\n";
+        _constructor += "\n\tpublic function new() {\n";
+        _constructor += "\n\t\tsuper();\n";
 
         for (var i:int = 0; i < _container.numChildren; ++i) {
             var child:DisplayObject = _container.getChildAt(i);
@@ -95,7 +96,7 @@ public class CustomSpriteParser implements IParseStrategy {
 
     public function toString():String {
         var body:String = new String();
-        body += "package " + _packageName + "{\n";
+        body += "package " + _packageName + ";\n";
 
         for (var line:String in _importsHashList) {
             body += line + "\n";
@@ -107,7 +108,6 @@ public class CustomSpriteParser implements IParseStrategy {
         body += _variables;
         body += _constructor;
 
-        body += "}\n";
         body += "}\n";
 
         return body;

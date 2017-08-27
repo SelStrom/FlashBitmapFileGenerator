@@ -39,7 +39,7 @@ public class SpriteParser implements IParseStrategy {
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import flash.display.Sprite;", true);
+        addToImports("import openfl.display.Sprite;", true);
 
         _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
         _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
