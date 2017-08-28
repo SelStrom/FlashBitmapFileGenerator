@@ -7,6 +7,12 @@ import flash.text.TextField;
 
 import parser.FlashStageParser;
 
+/**
+ * Парсим графику как битмап дату
+ * Для мувиклипа использовать аналог DirectMovieClip
+ * В санте цель сделать через tile map только игру.
+ * Гуй не трогать
+ */
 public class Main extends Sprite {
     public function Main() {
         var textField:TextField = new TextField();

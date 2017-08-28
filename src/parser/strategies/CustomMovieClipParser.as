@@ -51,12 +51,12 @@ public class CustomMovieClipParser implements IParseStrategy {
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import ssmit.DirectMovieClip;", true);
+        addToImports("import strom.haxe.display.MovieClip;", true);
 
         _externalConstructor = createConstructorData(_container);
 
         var fileName:String = Util.getName(_container);
-        var file:File = _dirrectory.resolvePath(fileName + ".as");
+        var file:File = _dirrectory.resolvePath(fileName + ".hx");
         if (file.exists) {
             trace("File " + fileName + " is exists. Abort");
             return this;
@@ -64,8 +64,9 @@ public class CustomMovieClipParser implements IParseStrategy {
         var fileStream:FileStream = new FileStream();
         fileStream.open(file, FileMode.WRITE);
 
-        _constructor += "\n\tpublic function " + Util.getName(_container) + "() {\n";
-//        _constructor += "\n\tframerate = " + _container.
+        _constructor += "\n\tpublic function new() {\n";
+        _constructor += "\t\tsuper();\n";
+        _constructor += "\n\tthis.frameRate = 30;\n";
 
         addToImports("import ssmit.FrameData;");
         _constructor += "\n\tthis.frameData = new FrameData("+_container.totalFrames+");\n";
@@ -106,19 +107,19 @@ public class CustomMovieClipParser implements IParseStrategy {
 
     public function toString():String {
         var body:String = new String();
-        body += "package " + _packageName + " {\n";
+        body += "package " + _packageName + ";\n";
 
         for (var line:String in _importsHashList) {
             body += line + "\n";
         }
 
         body += "\n";
-        body += "public class " + Util.getName(_container) + " extends DirectMovieClip {\n";
+        body += "class " + Util.getName(_container) + " extends MovieClip {\n";
 
         body += _variables;
         body += _constructor;
 
-        body += "}\n}\n";
+        body += "}\n";
 
         return body;
     }
