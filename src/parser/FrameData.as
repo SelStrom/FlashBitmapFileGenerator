@@ -22,6 +22,10 @@ import starling.display.Sprite;
 internal final class FrameData {
     private var _frameList:Vector.<Vector.<FrameDataVO>>;
 
+    public static function parceFrames(movieClip:MovieClip, isFlipFrames:Boolean = false):FrameData {
+
+    }
+
     // Imports frame data from a Flash MovieClip
     public static function importFromFlashMovieClip(movieClip:MovieClip, isFlipFrames:Boolean = false):FrameData {
         //!!!!!!!!!!!!В этом коде косяки с определением уникального контента во фреймах!!!!!!!!!!!!!!!!!!!!!!!
@@ -323,8 +327,6 @@ import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.geom.Matrix;
 
-import starling.display.DisplayObject;
-
 internal final class FrameDataVO {
     public var name:String;
     public var transformationMatrix:Matrix;
@@ -334,21 +336,11 @@ internal final class FrameDataVO {
     public var xmlObject:XML;
     public var cloneSource:DisplayObject;
 
-    /** Флаг определяет, является ли данная информация диблирующей по отношению к уже определенному объекту в другом кадре
-     *    По логике эта ссылка должна помочь восстановить настоящую структуру мувиклипа, когда в нескольких кадрах может быть один объект*/
-            //public var isReference			: Boolean = false;
-
-            //public var flashObjectWidth		: Number;
-            //public var flashObjectHeight	: Number;
-
     public var bitmapData:BitmapData;
 
     public function dispose():void {
         name = null;
         transformationMatrix = null;
-        //flashObject = null;
-        //flashObjectHeight = undefined;
-        //flashObjectWidth = undefined;
         cloneSource = null;
 
         bitmapData = null;

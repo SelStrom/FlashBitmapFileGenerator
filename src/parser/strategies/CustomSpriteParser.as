@@ -78,9 +78,6 @@ public class CustomSpriteParser implements IParseStrategy {
             var child:DisplayObject = _container.getChildAt(i);
             var childParseData:IParseStrategy = FlashStageParser.parse(child).execute();
 
-//            _variables += "\tpublic var " + child.name + ":" + childParseData.type + " = new " + childParseData.type + "();\n";
-//            _constructor += "\n\t\tthis.addChild(this." + child.name + ");\n";
-
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);
             }

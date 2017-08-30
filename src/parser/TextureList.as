@@ -15,12 +15,13 @@ import flash.geom.ColorTransform;
 
 import parser.strategies.BitmapInfo;
 
+
 //	import starling.display.Image;
 //	import starling.textures.Texture;
 //	import starling.textures.TextureAtlas;
 	
 	// The list of textures created from a ConvertedMovieClip
-	internal final class TextureList
+	public final class TextureList
 	{
 		internal static const PADDING		: int	= 1;	// Add padding pixels to avoid bleeding in mipmaps.
 		

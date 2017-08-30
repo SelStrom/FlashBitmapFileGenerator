@@ -17,6 +17,7 @@ import parser.strategies.CustomSpriteParser;
 import parser.strategies.GraphicsParser;
 
 import parser.strategies.IParseStrategy;
+import parser.strategies.MovieClipParser;
 import parser.strategies.SpriteParser;
 import parser.strategies.TextureAtlasVisitor;
 import parser.strategies.UnknownTypeParser;
@@ -222,16 +223,18 @@ public class FlashStageParser {
         //temp
         if (Util.getName(displayObject) == "Sprite") {
             return new SpriteParser(displayObject as Sprite);
-        } else if (Util.getName(displayObject) == "MovieClip") {
-            return new SpriteParser(displayObject as Sprite);
+        } else if (Util.getName(displayObject) == "MovieClip") {//TODO @a.shatalov: regular movie clip parser
+            if(ignoreTotalFrames || (displayObject as MovieClip).totalFrames > 1) {
+                return new MovieClipParser(displayObject as MovieClip);
+            } else {
+                return new SpriteParser(displayObject as Sprite);
+            }
         }
 
         else if (displayObject is DisplayObjectContainer) {
             var container:DisplayObjectContainer = displayObject as DisplayObjectContainer;
-            if (container is MovieClip/* && ( ignoreTotalFrames || (container as MovieClip).totalFrames > 1 )*/) {
-//                return new CustomMovieClipParser(container as MovieClip, _PACKAGE_NAME);
-//                return new SpriteParser(container as Sprite);
-                return new CustomSpriteParser(container as Sprite, _PACKAGE_NAME);
+            if (container is MovieClip && ( ignoreTotalFrames || (container as MovieClip).totalFrames > 1 )) {
+                return new CustomMovieClipParser(container as MovieClip, _PACKAGE_NAME);
             } else if (container is TextField) {
                 return new UnknownTypeParser();
             } else if (container is Sprite) {
