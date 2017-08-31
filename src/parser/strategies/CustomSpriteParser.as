@@ -11,11 +11,11 @@ import parser.Util;
 
 public class CustomSpriteParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
-    private var _externalConstructor = new String();
-    private var _externalVariables = new String();
+    private var _externalConstructor:String = new String();
+    private var _externalVariables:Dictionary = new Dictionary();
     private var _importsHashList:Dictionary = new Dictionary();
     public var _constructor:String = new String();
-    public var _variables:String = new String();
+    public var _variables:Dictionary = new Dictionary();
     private var _container:Sprite;
     private var _packageName:String;
 
@@ -29,7 +29,7 @@ public class CustomSpriteParser implements IParseStrategy {
         return _externalConstructor;
     }
 
-    public function get externalVariables():String {
+    public function get externalVariables():Dictionary {
         return _externalVariables;
     }
 
@@ -54,12 +54,20 @@ public class CustomSpriteParser implements IParseStrategy {
         }
     }
 
+    private function addToVariables(line:String, includeExternal:Boolean = true):void {
+        if (includeExternal) {
+            _externalVariables[line] = "";
+        } else {
+            _variables[line] = "";
+        }
+    }
+
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import openfl.display.Sprite;", true);
 
-        _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
+        addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
 
-        _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
+        _externalConstructor = "\n\t\t" + externalContext + ".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
         var fileName:String = Util.getClassName(_container);
@@ -81,7 +89,9 @@ public class CustomSpriteParser implements IParseStrategy {
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);
             }
-            _variables += childParseData.externalVariables;
+            for (line in childParseData.externalVariables) {
+                addToVariables(line, false);
+            }
             _constructor += childParseData.externalConstructor;
         }
         _constructor += "\t}\n";
@@ -102,7 +112,9 @@ public class CustomSpriteParser implements IParseStrategy {
         body += "\n";
         body += "class " + Util.getClassName(_container) + " extends Sprite {\n";
 
-        body += _variables;
+        for (var line:String in _variables) {
+            body += "\tpublic " + line + "\n";
+        }
         body += _constructor;
 
         body += "}\n";

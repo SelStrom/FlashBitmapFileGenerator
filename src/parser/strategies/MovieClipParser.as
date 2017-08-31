@@ -24,20 +24,24 @@ public class MovieClipParser implements IParseStrategy {
         return _externalImportsHashList;
     }
 
-    private var _externalConstructor = new String();
+    private var _externalConstructor:String = new String();
 
     public function get externalConstructor():String {
         return _externalConstructor;
     }
 
-    private var _externalVariables = new String();
+    private var _externalVariables:Dictionary = new Dictionary();
 
-    public function get externalVariables():String {
+    public function get externalVariables():Dictionary {
         return _externalVariables;
     }
 
     public function get type():String {
         return "MovieClip";
+    }
+
+    private function addToVariables(line:String):void {
+        _externalVariables[line] = "";
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
@@ -51,7 +55,7 @@ public class MovieClipParser implements IParseStrategy {
         var frameName:String = "frame" + name;
         var frameDataVOName:String = "frameDataVO" + name;
 
-        _externalVariables = "\tpublic var " + name + ":" + type + " = new " + type + "();\n";
+        addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
         _externalConstructor = "\n\t\t" + externalContext + ".addChild(this." + name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
@@ -99,7 +103,9 @@ public class MovieClipParser implements IParseStrategy {
                     for (var line:String in objectFrameData.parser.externalImportsHashList) {
                         addToImports(line);
                     }
-                    _externalConstructor += objectFrameData.parser.externalVariables;
+                    for (line in objectFrameData.parser.externalVariables) {
+                        addToVariables(line);
+                    }
                     _externalConstructor += objectFrameData.parser.externalConstructor;
                 }
 

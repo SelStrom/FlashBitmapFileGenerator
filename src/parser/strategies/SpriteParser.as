@@ -7,8 +7,8 @@ import parser.FlashStageParser;
 
 public class SpriteParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
-    private var _externalConstructor = new String();
-    private var _externalVariables = new String();
+    private var _externalConstructor:String = new String();
+    private var _externalVariables:Dictionary = new Dictionary();
     private var _container:Sprite;
 
     public function get type():String {
@@ -23,7 +23,7 @@ public class SpriteParser implements IParseStrategy {
         return _externalConstructor;
     }
 
-    public function get externalVariables():String {
+    public function get externalVariables():Dictionary {
         return _externalVariables;
     }
 
@@ -37,10 +37,15 @@ public class SpriteParser implements IParseStrategy {
         }
     }
 
+    private function addToVariables(line:String):void {
+        _externalVariables[line] = "";
+    }
+
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import openfl.display.Sprite;", true);
-        //TODO @a.shatalov: можно ли считать при externalContext != "this" не public var, а просто var
-        _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
+
+        addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
+
         _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
@@ -51,7 +56,9 @@ public class SpriteParser implements IParseStrategy {
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);
             }
-            _externalVariables += childParseData.externalVariables;
+            for (line in childParseData.externalVariables) {
+                addToVariables(line);
+            }
             _externalConstructor += childParseData.externalConstructor;
         }
 

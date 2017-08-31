@@ -17,11 +17,11 @@ import parser.Util;
 
 public class CustomMovieClipParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
-    private var _externalConstructor = new String();
-    private var _externalVariables = new String();
+    private var _externalConstructor:String = new String();
+    private var _externalVariables:Dictionary = new Dictionary();
     private var _importsHashList:Dictionary = new Dictionary();
     public var _constructor:String = new String();
-    public var _variables:String = new String();
+    public var _variables:Dictionary = new Dictionary();
     private var _container:MovieClip;
     private var _packageName:String;
 
@@ -33,7 +33,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         return _externalConstructor;
     }
 
-    public function get externalVariables():String {
+    public function get externalVariables():Dictionary {
         return _externalVariables;
     }
 
@@ -71,10 +71,18 @@ public class CustomMovieClipParser implements IParseStrategy {
         return null;
     }
 
+    private function addToVariables(line:String, includeExternal:Boolean = true):void {
+        if(includeExternal) {
+            _externalVariables[line] = "";
+        } else {
+            _variables[line] = "";
+        }
+    }
+
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import strom.haxe.display.MovieClip;", true);
 
-        _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
+        addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
 
         _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
@@ -137,7 +145,9 @@ public class CustomMovieClipParser implements IParseStrategy {
                     for (var line:String in objectFrameData.parser.externalImportsHashList) {
                         addToImports(line);
                     }
-                    _variables += objectFrameData.parser.externalVariables;
+                    for (line in objectFrameData.parser.externalVariables) {
+                        addToVariables(line, false);
+                    }
                     _constructor += objectFrameData.parser.externalConstructor;
                 }
 
@@ -196,7 +206,9 @@ public class CustomMovieClipParser implements IParseStrategy {
         body += "\n";
         body += "class " + Util.getClassName(_container) + " extends MovieClip {\n";
 
-        body += _variables;
+        for (var line:String in _variables) {
+            body += "\tpublic " + line + "\n";
+        }
         body += _constructor;
 
         body += "}\n";

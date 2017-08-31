@@ -5,8 +5,8 @@ import flash.utils.Dictionary;
 
 public class GraphicsParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
-    private var _externalConstructor = new String();
-    private var _externalVariables = new String();
+    private var _externalConstructor:String = new String();
+    private var _externalVariables:Dictionary = new Dictionary();
     private var _displayObject:DisplayObject;
     private var _visitor:IParserVisitor;
 
@@ -23,7 +23,7 @@ public class GraphicsParser implements IParseStrategy {
         return _externalConstructor;
     }
 
-    public function get externalVariables():String {
+    public function get externalVariables():Dictionary {
         return _externalVariables;
     }
 
