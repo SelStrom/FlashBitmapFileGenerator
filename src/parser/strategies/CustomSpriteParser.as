@@ -22,7 +22,7 @@ public class CustomSpriteParser implements IParseStrategy {
     private var _directory:File = File.applicationStorageDirectory;
 
     public function get type():String {
-        return Util.getName(_container);
+        return Util.getClassName(_container);
     }
 
     public function get externalConstructor():String {

@@ -4,7 +4,6 @@ import flash.display.Sprite;
 import flash.utils.Dictionary;
 
 import parser.FlashStageParser;
-import parser.Util;
 
 public class SpriteParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();

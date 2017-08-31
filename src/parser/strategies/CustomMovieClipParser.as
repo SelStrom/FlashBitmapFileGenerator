@@ -231,7 +231,7 @@ public class CustomMovieClipParser implements IParseStrategy {
     }
 
     public function get type():String {
-        return Util.getName(_container);
+        return Util.getClassName(_container);
     }
 }
 }
