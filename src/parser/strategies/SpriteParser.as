@@ -13,7 +13,7 @@ public class SpriteParser implements IParseStrategy {
     private var _container:Sprite;
 
     public function get type():String {
-        return Util.getName(_container);
+        return "Sprite";
     }
 
     public function get externalImportsHashList():Dictionary {
@@ -40,7 +40,7 @@ public class SpriteParser implements IParseStrategy {
 
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import openfl.display.Sprite;", true);
-
+        //TODO @a.shatalov: можно ли считать при externalContext != "this" не public var, а просто var
         _externalVariables = "\tpublic var " + _container.name + ":" + type + " = new " + type + "();\n";
         _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
@@ -48,9 +48,6 @@ public class SpriteParser implements IParseStrategy {
         for (var i:int = 0; i < _container.numChildren; ++i) {
             var child:DisplayObject = _container.getChildAt(i);
             var childParseData:IParseStrategy = FlashStageParser.parse(child).execute(externalContext + "." +_container.name);
-
-//            _externalConstructor += "\t\tvar " + child.name + ":" + childParseData.type + " = new " + childParseData.type + "();\n";
-//            _externalConstructor += "\n\t\t"+_container.name+".addChild(this." + child.name + ");\n";
 
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);

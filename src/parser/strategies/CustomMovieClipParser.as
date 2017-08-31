@@ -25,7 +25,9 @@ public class CustomMovieClipParser implements IParseStrategy {
     private var _container:MovieClip;
     private var _packageName:String;
 
-    private var _dirrectory:File = File.applicationStorageDirectory;
+    private var _frameList:Vector.<Vector.<FrameDataVO>>;
+
+    private var _directory:File = File.applicationStorageDirectory;
 
     public function get externalConstructor():String {
         return _externalConstructor;
@@ -44,9 +46,9 @@ public class CustomMovieClipParser implements IParseStrategy {
         _container = container;
         _packageName = packageName;
 
-        _dirrectory = _dirrectory.resolvePath(_packageName);
-        if (!_dirrectory.exists) {
-            _dirrectory.createDirectory();
+        _directory = _directory.resolvePath(_packageName);
+        if (!_directory.exists) {
+            _directory.createDirectory();
         }
     }
 
@@ -56,8 +58,6 @@ public class CustomMovieClipParser implements IParseStrategy {
             _externalImportsHashList[line] = "";
         }
     }
-
-    private var _frameList:Vector.<Vector.<FrameDataVO>>;
 
     private function findObjectFrameData(bitmapData:BitmapData):FrameDataVO {
         for (var frame:int = _frameList.length - 1; frame >= 0; --frame) {
@@ -80,7 +80,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         _externalConstructor += createConstructorData(_container);
 
         var fileName:String = Util.getName(_container);
-        var file:File = _dirrectory.resolvePath(fileName + ".hx");
+        var file:File = _directory.resolvePath(fileName + ".hx");
         if (file.exists) {
             trace("File " + fileName + " is exists. Abort");
             return this;
@@ -234,24 +234,4 @@ public class CustomMovieClipParser implements IParseStrategy {
         return Util.getName(_container);
     }
 }
-}
-
-import flash.display.BitmapData;
-import flash.geom.Matrix;
-
-import parser.strategies.IParseStrategy;
-
-internal final class FrameDataVO {
-    public var name:String;
-    public var transformationMatrix:Matrix;
-    public var alpha:Number;
-
-    public var parser:IParseStrategy;
-    public var bitmapData:BitmapData;
-
-    public function dispose():void {
-        name = null;
-        transformationMatrix = null;
-        bitmapData = null;
-    }
 }
