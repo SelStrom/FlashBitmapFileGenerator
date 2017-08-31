@@ -79,7 +79,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
-        var fileName:String = Util.getName(_container);
+        var fileName:String = Util.getClassName(_container);
         var file:File = _directory.resolvePath(fileName + ".hx");
         if (file.exists) {
             trace("File " + fileName + " is exists. Abort");
@@ -194,7 +194,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         }
 
         body += "\n";
-        body += "class " + Util.getName(_container) + " extends MovieClip {\n";
+        body += "class " + Util.getClassName(_container) + " extends MovieClip {\n";
 
         body += _variables;
         body += _constructor;

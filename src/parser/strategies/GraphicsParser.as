@@ -11,7 +11,7 @@ public class GraphicsParser implements IParseStrategy {
     private var _visitor:IParserVisitor;
 
     public function get type():String {
-        return "Tile";
+        return "Bitmap";
     }
 
 
