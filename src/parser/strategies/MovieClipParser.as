@@ -2,7 +2,9 @@ package parser.strategies {
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.display.FrameLabel;
 import flash.display.MovieClip;
+import flash.display.Scene;
 import flash.display.Shape;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
@@ -15,6 +17,7 @@ public class MovieClipParser implements IParseStrategy {
     public function MovieClipParser(container:MovieClip) {
         _container = container;
     }
+
     private var _container:MovieClip;
     private var _frameList:Vector.<Vector.<FrameDataVO>>;
 
@@ -49,6 +52,7 @@ public class MovieClipParser implements IParseStrategy {
         addToImports("import strom.FrameData;", true);
         addToImports("import strom.FrameDataVO;", true);
         addToImports("import haxe.ds.Array;", true);
+        addToImports("import openfl.display.FrameLabel", true);
 
         var name:String = _container.name;
         var frameDataName:String = "frameData" + name;
@@ -136,6 +140,17 @@ public class MovieClipParser implements IParseStrategy {
         }
 
         _externalConstructor += "\n\t\tthis." + name + ".frameData = this." + frameDataName + ";\n";
+
+        var sceneCount:int = _container.scenes.length;
+        for (var sceneIndex:int = 0; sceneIndex < sceneCount; ++sceneIndex) {
+            var scene:Scene = _container.scenes[sceneIndex];
+            for each(var label:FrameLabel in scene.labels) {
+                var labelName:String = label.name;
+                var labelFrame:int = label.frame;
+
+                _externalConstructor += "\n\t\tthis." + name + ".addLabel(new FrameLabel(\"" + labelName + "\", " + labelFrame + "));\n";
+            }
+        }
 
         //Dispose trash data
         for (frame = _frameList.length - 1; frame >= 0; --frame) {

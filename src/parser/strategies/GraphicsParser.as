@@ -14,7 +14,6 @@ public class GraphicsParser implements IParseStrategy {
         return "Bitmap";
     }
 
-
     public function get externalImportsHashList():Dictionary {
         return _externalImportsHashList;
     }

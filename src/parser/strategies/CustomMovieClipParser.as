@@ -2,7 +2,9 @@ package parser.strategies {
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.display.FrameLabel;
 import flash.display.MovieClip;
+import flash.display.Scene;
 import flash.display.Shape;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
@@ -72,7 +74,7 @@ public class CustomMovieClipParser implements IParseStrategy {
     }
 
     private function addToVariables(line:String, includeExternal:Boolean = true):void {
-        if(includeExternal) {
+        if (includeExternal) {
             _externalVariables[line] = "";
         } else {
             _variables[line] = "";
@@ -84,7 +86,7 @@ public class CustomMovieClipParser implements IParseStrategy {
 
         addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
 
-        _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
+        _externalConstructor = "\n\t\t" + externalContext + ".addChild(this." + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
         var fileName:String = Util.getClassName(_container);
@@ -103,12 +105,13 @@ public class CustomMovieClipParser implements IParseStrategy {
         addToImports("import strom.FrameData;");
         addToImports("import strom.FrameDataVO;");
         addToImports("import haxe.ds.Array;");
-        _constructor += "\n\t\tthis.frameData = new FrameData("+_container.totalFrames+");\n";
+        addToImports("import openfl.display.FrameLabel");
+        _constructor += "\n\t\tthis.frameData = new FrameData(" + _container.totalFrames + ");\n";
         _constructor += "\t\tvar frame : Array<FrameDataVO>;\n";
         _constructor += "\t\tvar frameDataVO : FrameDataVO;\n\n";
 
         _frameList = new Vector.<Vector.<FrameDataVO>>();
-        for (var frame:int = 1; frame<=_container.totalFrames; frame++) {
+        for (var frame:int = 1; frame <= _container.totalFrames; frame++) {
             _container.gotoAndStop(frame);
             _constructor += "\t\tthis.frame = new Array<FrameDataVO>();\n";
 
@@ -161,8 +164,8 @@ public class CustomMovieClipParser implements IParseStrategy {
                 _constructor += "\t\tthis.frameDataVO.transformationMatrix.tx = " + child.transform.matrix.tx + ";\n";
                 _constructor += "\t\tthis.frameDataVO.transformationMatrix.ty = " + child.transform.matrix.ty + ";\n";
                 if (child is Shape || child is Bitmap) {
-                    var objectRect:Rectangle = child.getBounds( child );
-                    if(objectRect.left != 0 || objectRect.top != 0) {
+                    var objectRect:Rectangle = child.getBounds(child);
+                    if (objectRect.left != 0 || objectRect.top != 0) {
                         _constructor += "\n";
                         _constructor += "\t\tthis.frameDataVO.transformationMatrix.tx += " + objectRect.left + ";\n";
                         _constructor += "\t\tthis.frameDataVO.transformationMatrix.ty += " + objectRect.top + ";\n";
@@ -175,6 +178,17 @@ public class CustomMovieClipParser implements IParseStrategy {
             }
 
             _constructor += "\n\t\tthis.frameData.addFrame(" + (frame - 1) + ", this.frame);\n";
+        }
+
+        var sceneCount:int = _container.scenes.length;
+        for (var sceneIndex:int = 0; sceneIndex < sceneCount; ++sceneIndex) {
+            var scene:Scene = _container.scenes[sceneIndex];
+            for each(var label:FrameLabel in scene.labels) {
+                var labelName:String = label.name;
+                var labelFrame:int = label.frame;
+
+                _constructor += "\n\t\tthis.addLabel(new FrameLabel(\"" + labelName + "\", " + labelFrame + "));\n";
+            }
         }
 
         _constructor += "\t}\n";

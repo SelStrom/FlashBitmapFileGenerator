@@ -2,6 +2,8 @@
  * Created by Andrey on 18.06.2017.
  */
 package parser {
+import fl.text.TLFTextField;
+
 import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
@@ -19,6 +21,8 @@ import parser.strategies.GraphicsParser;
 import parser.strategies.IParseStrategy;
 import parser.strategies.MovieClipParser;
 import parser.strategies.SpriteParser;
+import parser.strategies.TLFTextParser;
+import parser.strategies.TextParser;
 import parser.strategies.TextureAtlasVisitor;
 import parser.strategies.UnknownTypeParser;
 
@@ -223,7 +227,7 @@ public class FlashStageParser {
         //temp
         if (Util.getName(displayObject) == "Sprite") {
             return new SpriteParser(displayObject as Sprite);
-        } else if (Util.getName(displayObject) == "MovieClip") {//TODO @a.shatalov: regular movie clip parser
+        } else if (Util.getName(displayObject) == "MovieClip") {
             if(ignoreTotalFrames || (displayObject as MovieClip).totalFrames > 1) {
                 return new MovieClipParser(displayObject as MovieClip);
             } else {
@@ -236,7 +240,11 @@ public class FlashStageParser {
             if (container is MovieClip && ( ignoreTotalFrames || (container as MovieClip).totalFrames > 1 )) {
                 return new CustomMovieClipParser(container as MovieClip, _PACKAGE_NAME);
             } else if (container is TextField) {
-                return new UnknownTypeParser();
+                return new TextParser(container as TextField);
+            } else if (container is TLFTextField) {
+                return new TLFTextParser(container as TLFTextField);
+            } else if (Util.getName(container) == "TCMText") {
+                return new GraphicsParser(container, _texureAtlasVisitor);
             } else if (container is Sprite) {
                 return new CustomSpriteParser(container as Sprite, _PACKAGE_NAME);
             } //else throw new Error("Unhandled child object " + displayObject.toString());
@@ -245,7 +253,7 @@ public class FlashStageParser {
         } else if (displayObject is Bitmap) {
             return new GraphicsParser(displayObject, _texureAtlasVisitor);
         } //TODO обработка MorphShape
-        return new UnknownTypeParser();
+        return new UnknownTypeParser(displayObject);
     }
 
     public static function createAtlas():void {

@@ -1,10 +1,16 @@
 package parser.strategies {
+import flash.display.DisplayObject;
 import flash.utils.Dictionary;
 
+import parser.Util;
+
 public class UnknownTypeParser implements IParseStrategy {
-    public var _emptyDictionarty:Dictionary = new Dictionary();
-    public function UnknownTypeParser() {
-        _emptyDictionarty["---unknown type hash"] = "";
+    public var _emptyDictionary:Dictionary = new Dictionary();
+    private var _displayObject:DisplayObject;
+
+    public function UnknownTypeParser(displayObject:DisplayObject) {
+        _displayObject = displayObject;
+        _emptyDictionary["---unknown type hash: " + Util.getName(displayObject)] = "";
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
@@ -12,15 +18,15 @@ public class UnknownTypeParser implements IParseStrategy {
     }
 
     public function get externalImportsHashList():Dictionary {
-        return _emptyDictionarty;
+        return _emptyDictionary;
     }
 
     public function get externalConstructor():String {
-        return "---unknown type\n";
+        return "---unknown type for:" + Util.getName(_displayObject) + "\n";
     }
 
     public function get externalVariables():Dictionary {
-        return _emptyDictionarty;
+        return _emptyDictionary;
     }
 
     public function get type():String {
