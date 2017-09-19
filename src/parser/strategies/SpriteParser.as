@@ -5,11 +5,14 @@ import flash.utils.Dictionary;
 
 import parser.FlashStageParser;
 
+import parser.FlashStageParser;
+
 public class SpriteParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
     private var _externalConstructor:String = new String();
     private var _externalVariables:Dictionary = new Dictionary();
     private var _container:Sprite;
+    private var _parser:FlashStageParser;
 
     public function get type():String {
         return "Sprite";
@@ -27,7 +30,8 @@ public class SpriteParser implements IParseStrategy {
         return _externalVariables;
     }
 
-    public function SpriteParser(container:Sprite) {
+    public function SpriteParser(parser:FlashStageParser, container:Sprite) {
+        _parser = parser;
         _container = container;
     }
 
@@ -51,7 +55,7 @@ public class SpriteParser implements IParseStrategy {
 
         for (var i:int = 0; i < _container.numChildren; ++i) {
             var child:DisplayObject = _container.getChildAt(i);
-            var childParseData:IParseStrategy = FlashStageParser.parse(child).execute(externalContext + "." +_container.name);
+            var childParseData:IParseStrategy = _parser.createParser(child).execute(externalContext + "." +_container.name);
 
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);

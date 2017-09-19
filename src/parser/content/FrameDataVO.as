@@ -1,8 +1,10 @@
-package parser.strategies {
+package parser.content {
+import parser.strategies.*;
+
 import flash.display.BitmapData;
 import flash.geom.Matrix;
 
-internal final class FrameDataVO {
+public final class FrameDataVO {
     public var name:String;
     public var transformationMatrix:Matrix;
     public var alpha:Number;

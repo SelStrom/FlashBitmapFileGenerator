@@ -1,9 +1,12 @@
-package parser.strategies {
+package parser {
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+
+import parser.content.BitmapInfo;
+import parser.strategies.*;
 
 public class TextureAtlasVisitor implements IParserVisitor {
     internal static const PADDING:int = 1;	// Add padding pixels to avoid bleeding in mipmaps.
@@ -13,7 +16,6 @@ public class TextureAtlasVisitor implements IParserVisitor {
 
     /** Содержит сырую информацию о всей графике*/
     private var _bitmapInfoList:Vector.<BitmapInfo>;
-
 
     public function TextureAtlasVisitor() {
         _bitmapInfoList = new <BitmapInfo>[];
@@ -75,5 +77,12 @@ public class TextureAtlasVisitor implements IParserVisitor {
 
         return info;
     }
+
+    internal function exportTextureAtlases(sortBitmaps:Boolean, srcPath:String, atlasPath:String, packageName:String):void {
+        var context:BitmapDataLibraryContext = new BitmapDataLibraryContext(srcPath , atlasPath);
+        context.setPackageName(packageName);
+        context.execute(_bitmapInfoList, sortBitmaps);
+    }
 }
 }
+

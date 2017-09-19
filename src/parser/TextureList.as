@@ -3,23 +3,14 @@
  */
 package parser
 {
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.DisplayObject;
-import flash.display3D.textures.Texture;
-import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.utils.ByteArray;
+import flash.display.BitmapData;
+import flash.display.DisplayObject;
+import flash.geom.Matrix;
+import flash.geom.Point;
+import flash.geom.Rectangle;
 
-import parser.strategies.BitmapInfo;
+import parser.content.BitmapInfo;
 
-
-//	import starling.display.Image;
-//	import starling.textures.Texture;
-//	import starling.textures.TextureAtlas;
-	
 	// The list of textures created from a ConvertedMovieClip
 	public final class TextureList
 	{

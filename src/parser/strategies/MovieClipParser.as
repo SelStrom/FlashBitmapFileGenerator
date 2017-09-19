@@ -11,10 +11,15 @@ import flash.geom.Rectangle;
 import flash.utils.Dictionary;
 
 import parser.FlashStageParser;
+
+import parser.FlashStageParser;
 import parser.TextureList;
+import parser.content.FrameDataVO;
 
 public class MovieClipParser implements IParseStrategy {
-    public function MovieClipParser(container:MovieClip) {
+    private var _parser:FlashStageParser;
+    public function MovieClipParser(parser:FlashStageParser, container:MovieClip) {
+        _parser = parser;
         _container = container;
     }
 
@@ -51,8 +56,7 @@ public class MovieClipParser implements IParseStrategy {
         addToImports("import strom.haxe.display.MovieClip;", true);
         addToImports("import strom.FrameData;", true);
         addToImports("import strom.FrameDataVO;", true);
-        addToImports("import haxe.ds.Array;", true);
-        addToImports("import openfl.display.FrameLabel", true);
+        addToImports("import openfl.display.FrameLabel;", true);
 
         var name:String = _container.name;
         var frameDataName:String = "frameData" + name;
@@ -63,7 +67,7 @@ public class MovieClipParser implements IParseStrategy {
         _externalConstructor = "\n\t\t" + externalContext + ".addChild(this." + name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
-        _externalConstructor += "\n\t\tthis." + name + ".frameRate = 30;\n";
+        _externalConstructor += "\n\t\tthis." + name + ".frameRate = "+_parser.framerate+";\n";
 
         _externalConstructor += "\n\t\tthis." + frameDataName + " = new FrameData(" + _container.totalFrames + ");\n";
         _externalConstructor += "\t\tvar ." + frameName + ": Array<FrameDataVO>;\n";
@@ -102,7 +106,7 @@ public class MovieClipParser implements IParseStrategy {
                 else {
                     //parse as new object
                     objectFrameData.name = child.name;
-                    objectFrameData.parser = FlashStageParser.parse(child).execute("this." + frameDataVOName + "");
+                    objectFrameData.parser = _parser.createParser(child).execute("this." + frameDataVOName + "");
 
                     for (var line:String in objectFrameData.parser.externalImportsHashList) {
                         addToImports(line);

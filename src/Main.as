@@ -1,11 +1,17 @@
 package {
 
-import flash.display.MovieClip;
 import flash.display.Sprite;
+import flash.events.KeyboardEvent;
 import flash.filesystem.File;
 import flash.text.TextField;
+import flash.text.TextFieldAutoSize;
+import flash.text.TextFieldType;
+import flash.ui.Keyboard;
+
+import resourceLoader.SingleResourceLoader;
 
 import parser.FlashStageParser;
+import parser.Logger;
 
 /**
  * Парсим графику как битмап дату
@@ -14,36 +20,75 @@ import parser.FlashStageParser;
  * Гуй не трогать
  */
 public class Main extends Sprite {
+
+    private var _inputField:TextField;
+
     public function Main() {
         var textField:TextField = new TextField();
-        textField.text = "Hello, World";
+        textField.autoSize = TextFieldAutoSize.LEFT;
+        textField.text = "Input the path to swf.";
         addChild(textField);
-        //TODO @a.shatalov: implement main
-        //Сформировать атлас
-        //Сгенерировать классы, работащие с этим атласом
-        var initClasses:Vector.<Class> = new <Class>[mcWinMainMenu, mcBlowVacuum, mcDialogBlob, mcBlowSimple,mcBorderLevelLineGreen,mcBorderLevelLineRed,
-            /*mcBorderLine,*/mcBtnBlow,mcBtnBuild,mcBtnClose,/*mcBtnEnter,*/
-            mcBtnLeft,/*mcBtnLeftTop,*/mcBtnRecickle,mcBtnReset,mcBtnRight,/*mcBtnRightTop,*//*mcBtnSave,*/
-            mcBtnSelectLevel,mcBtnSquareRedOut,mcBtnSquareRedOver,/*mcBtnTake,mcBtnTestBuilding,*/ mcFon,/*mcElementsLayer,mcFarCastles,mcFarGlass,mcFarTrees,mcFriendsPanel,*/
-            /*mcFriendsPanelItemsLayer,mcInterfaceLayer,mcLocationArea,*/
-            mcLocationCastel,/*mcLocationLayer,mcLocationMap,*/mcMainScene,
-            mcPlace,mcPlaceList,/*mcPlaceMask,mcRecickeIcon,*/ mcSkies,
-            mcSmoke,mcSmokeJoint,mcSmokeJointBad,
-            mcWinBorderConsole,mcWinLevelResult,mcWinLoadLocation,mcWinNotify,
-            mcWinSelectLevel, mcWinWait];
 
-        var dirrectory:File = File.applicationStorageDirectory;
-        dirrectory = dirrectory.resolvePath("generated");
-        if(dirrectory.exists) {
-            dirrectory.deleteDirectory(true);
+        _inputField = new TextField();
+        _inputField.border = true;
+        _inputField.type = TextFieldType.INPUT;
+        _inputField.autoSize = TextFieldAutoSize.LEFT;
+        _inputField.text = "type there";
+        addChild(_inputField);
+        _inputField.y = textField.height + 8;
+
+        var outputLog:TextField = new TextField();
+        outputLog.multiline = true;
+        addChild(outputLog);
+        outputLog.y = _inputField.y + 8;
+        outputLog.width = stage.stageWidth;
+        outputLog.height = stage.stageHeight - outputLog.y;
+
+        Logger.output = outputLog;
+
+        addEventListener(KeyboardEvent.KEY_UP, startParsing);
+
+        Logger.trace("Test line");
+    }
+
+    private function startParsing(event:KeyboardEvent):void {
+        if(event.charCode == Keyboard.ENTER) {
+            var loader:SingleResourceLoader = new SingleResourceLoader();
+            loader.onLoadComplete = onLoadComplete;
+            loader.load(_inputField.text);
+        }
+    }
+
+    private function onLoadComplete(loader:SingleResourceLoader):void {
+//        //Сгенерировать классы, работащие с этим атласом
+//        var initClasses:Vector.<Class> = new <Class>[mcWinMainMenu, mcBlowVacuum, mcDialogBlob, mcBlowSimple,mcBorderLevelLineGreen,mcBorderLevelLineRed,
+//            /*mcBorderLine,*/mcBtnBlow,mcBtnBuild,mcBtnClose,/*mcBtnEnter,*/
+//            mcBtnLeft,/*mcBtnLeftTop,*/mcBtnRecickle,mcBtnReset,mcBtnRight,/*mcBtnRightTop,*//*mcBtnSave,*/
+//            mcBtnSelectLevel,mcBtnSquareRedOut,mcBtnSquareRedOver,/*mcBtnTake,mcBtnTestBuilding,*/ mcFon,/*mcElementsLayer,mcFarCastles,mcFarGlass,mcFarTrees,mcFriendsPanel,*/
+//            mcLocationCastel, mcMainScene,
+//            mcPlace,mcPlaceList, mcSkies,
+//            mcSmoke,mcSmokeJoint,mcSmokeJointBad,
+//            mcWinBorderConsole,mcWinLevelResult,mcWinLoadLocation,mcWinNotify,
+//            mcWinSelectLevel, mcWinWait];
+
+//        var path:String = _inputField.text;
+//        if(path.substring(path.length-1) != "/") {
+//            path = path + "/";
+//        }
+
+        var directory:File = new File(_inputField.text);
+        while(!directory.isDirectory) {
+            directory = directory.parent;
+        }
+        var sourceDirectory:File = directory.resolvePath("generated");
+        if(sourceDirectory.exists) {
+            sourceDirectory.deleteDirectory(true);
         }
 
+        new FlashStageParser(directory.nativePath + "\\").exportFromMC(loader.content);
 
-        FlashStageParser.exportMC(initClasses);
-//        FlashStageParser.
-
-        dirrectory.openWithDefaultApplication();
-        dirrectory.cancel();
+        directory.openWithDefaultApplication();
+        directory.cancel();
     }
 }
 }

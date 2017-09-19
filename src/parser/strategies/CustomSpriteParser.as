@@ -7,6 +7,9 @@ import flash.filesystem.FileStream;
 import flash.utils.Dictionary;
 
 import parser.FlashStageParser;
+
+import parser.FlashStageParser;
+import parser.Logger;
 import parser.Util;
 
 public class CustomSpriteParser implements IParseStrategy {
@@ -19,7 +22,8 @@ public class CustomSpriteParser implements IParseStrategy {
     private var _container:Sprite;
     private var _packageName:String;
 
-    private var _directory:File = File.applicationStorageDirectory;
+    private var _directory:File;
+    private var _parser:FlashStageParser;
 
     public function get type():String {
         return Util.getClassName(_container);
@@ -37,11 +41,12 @@ public class CustomSpriteParser implements IParseStrategy {
         return _externalImportsHashList;
     }
 
-    public function CustomSpriteParser(container:Sprite, packageName:String) {
+    public function CustomSpriteParser(parser:FlashStageParser, container:Sprite, packageName:String) {
+        _parser = parser;
         _container = container;
         _packageName = packageName;
 
-        _directory = _directory.resolvePath(_packageName);
+        _directory = new File(_parser.srcOutputPath).resolvePath(_packageName);
         if (!_directory.exists) {
             _directory.createDirectory();
         }
@@ -73,7 +78,7 @@ public class CustomSpriteParser implements IParseStrategy {
         var fileName:String = Util.getClassName(_container);
         var file:File = _directory.resolvePath(fileName + ".hx");
         if (file.exists) {
-            trace("File " + fileName + " is exists. Abort");
+            Logger.trace("File " + fileName + " is exists. Abort");
             return this;
         }
         var fileStream:FileStream = new FileStream();
@@ -84,7 +89,7 @@ public class CustomSpriteParser implements IParseStrategy {
 
         for (var i:int = 0; i < _container.numChildren; ++i) {
             var child:DisplayObject = _container.getChildAt(i);
-            var childParseData:IParseStrategy = FlashStageParser.parse(child).execute();
+            var childParseData:IParseStrategy = _parser.createParser(child).execute();
 
             for (var line:String in childParseData.externalImportsHashList) {
                 addToImports(line);
@@ -112,7 +117,7 @@ public class CustomSpriteParser implements IParseStrategy {
         body += "\n";
         body += "class " + Util.getClassName(_container) + " extends Sprite {\n";
 
-        for (var line:String in _variables) {
+        for (line in _variables) {
             body += "\tpublic " + line + "\n";
         }
         body += _constructor;

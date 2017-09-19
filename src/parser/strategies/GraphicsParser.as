@@ -3,6 +3,8 @@ import flash.display.DisplayObject;
 import flash.geom.Rectangle;
 import flash.utils.Dictionary;
 
+import parser.content.BitmapInfo;
+
 public class GraphicsParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
     private var _externalConstructor:String = new String();
@@ -39,7 +41,7 @@ public class GraphicsParser implements IParseStrategy {
 
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import openfl.display.Bitmap;", true);
-        addToImports("import BitmapDataLibrary;", true);
+//        addToImports("import BitmapDataLibrary;", true);
 
         var info:BitmapInfo = _visitor.visitGraphics(_displayObject);
 

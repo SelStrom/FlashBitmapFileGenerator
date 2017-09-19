@@ -14,8 +14,12 @@ import flash.geom.Rectangle;
 import flash.utils.Dictionary;
 
 import parser.FlashStageParser;
+
+import parser.FlashStageParser;
+import parser.Logger;
 import parser.TextureList;
 import parser.Util;
+import parser.content.FrameDataVO;
 
 public class CustomMovieClipParser implements IParseStrategy {
     private var _externalImportsHashList:Dictionary = new Dictionary();
@@ -29,7 +33,8 @@ public class CustomMovieClipParser implements IParseStrategy {
 
     private var _frameList:Vector.<Vector.<FrameDataVO>>;
 
-    private var _directory:File = File.applicationStorageDirectory;
+    private var _directory:File;
+    private var _parser:FlashStageParser;
 
     public function get externalConstructor():String {
         return _externalConstructor;
@@ -44,11 +49,12 @@ public class CustomMovieClipParser implements IParseStrategy {
     }
 
 
-    public function CustomMovieClipParser(container:MovieClip, packageName:String) {
+    public function CustomMovieClipParser(parser:FlashStageParser, container:MovieClip, packageName:String) {
+        _parser = parser;
         _container = container;
         _packageName = packageName;
 
-        _directory = _directory.resolvePath(_packageName);
+        _directory = new File(_parser.srcOutputPath).resolvePath(_packageName);
         if (!_directory.exists) {
             _directory.createDirectory();
         }
@@ -92,7 +98,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         var fileName:String = Util.getClassName(_container);
         var file:File = _directory.resolvePath(fileName + ".hx");
         if (file.exists) {
-            trace("File " + fileName + " is exists. Abort");
+            Logger.trace("File " + fileName + " is exists. Abort");
             return this;
         }
         var fileStream:FileStream = new FileStream();
@@ -100,12 +106,11 @@ public class CustomMovieClipParser implements IParseStrategy {
 
         _constructor += "\n\tpublic function new() {\n";
         _constructor += "\t\tsuper();\n";
-        _constructor += "\n\t\tthis.frameRate = 30;\n";
+        _constructor += "\n\t\tthis.frameRate = "+_parser.framerate+";\n";
 
         addToImports("import strom.FrameData;");
         addToImports("import strom.FrameDataVO;");
-        addToImports("import haxe.ds.Array;");
-        addToImports("import openfl.display.FrameLabel");
+        addToImports("import openfl.display.FrameLabel;");
         _constructor += "\n\t\tthis.frameData = new FrameData(" + _container.totalFrames + ");\n";
         _constructor += "\t\tvar frame : Array<FrameDataVO>;\n";
         _constructor += "\t\tvar frameDataVO : FrameDataVO;\n\n";
@@ -143,7 +148,7 @@ public class CustomMovieClipParser implements IParseStrategy {
                 else {
                     //parse as new object
                     objectFrameData.name = child.name;
-                    objectFrameData.parser = FlashStageParser.parse(child).execute("this.frameDataVO");
+                    objectFrameData.parser = _parser.createParser(child).execute("this.frameDataVO");
 
                     for (var line:String in objectFrameData.parser.externalImportsHashList) {
                         addToImports(line);
@@ -220,7 +225,7 @@ public class CustomMovieClipParser implements IParseStrategy {
         body += "\n";
         body += "class " + Util.getClassName(_container) + " extends MovieClip {\n";
 
-        for (var line:String in _variables) {
+        for (line in _variables) {
             body += "\tpublic " + line + "\n";
         }
         body += _constructor;

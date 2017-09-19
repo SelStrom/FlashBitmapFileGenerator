@@ -11,6 +11,8 @@ import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import flash.utils.Dictionary;
 
+import old.ssmit.DirectMovieClip;
+
 import starling.text.TextField;
 
 import starling.animation.IAnimatable;
@@ -84,7 +86,7 @@ internal final class FrameData {
                     objectFrameData.name = child.name.slice();//получаем имя
 
                     // I'm not too happy about how this ended up.
-                    var object:Object = FlashStageParser.parse(child);//тут либо создается контейнер либо запекается объект
+                    var object:Object = FlashStageParser.createParser(child);//тут либо создается контейнер либо запекается объект
                     if (object is starling.display.DisplayObject)
                         objectFrameData.starlingObject = starling.display.DisplayObject(object);
                     else if (object is XML)
