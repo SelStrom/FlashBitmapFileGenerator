@@ -89,10 +89,11 @@ public class CustomMovieClipParser implements IParseStrategy {
 
     public function execute(externalContext:String = "this"):IParseStrategy {
         addToImports("import strom.haxe.display.MovieClip;", true);
+        addToImports("import openfl.geom.Matrix;", true);
 
         addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
 
-        _externalConstructor = "\n\t\t" + externalContext + ".addChild(this." + _container.name + ");\n";
+        _externalConstructor = "\n\t\t" + externalContext + ".addChild(" + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
         var fileName:String = Util.getClassName(_container);
@@ -106,19 +107,19 @@ public class CustomMovieClipParser implements IParseStrategy {
 
         _constructor += "\n\tpublic function new() {\n";
         _constructor += "\t\tsuper();\n";
-        _constructor += "\n\t\tthis.frameRate = "+_parser.framerate+";\n";
+        _constructor += "\n\t\tframeRate = "+_parser.framerate+";\n";
 
         addToImports("import strom.FrameData;");
         addToImports("import strom.FrameDataVO;");
         addToImports("import openfl.display.FrameLabel;");
-        _constructor += "\n\t\tthis.frameData = new FrameData(" + _container.totalFrames + ");\n";
-        _constructor += "\t\tvar frame : Array<FrameDataVO>;\n";
+        _constructor += "\n\t\tframeData = new FrameData(" + _container.totalFrames + ");\n";
+        _constructor += "\t\tvar frames : Array<FrameDataVO>;\n";
         _constructor += "\t\tvar frameDataVO : FrameDataVO;\n\n";
 
         _frameList = new Vector.<Vector.<FrameDataVO>>();
         for (var frame:int = 1; frame <= _container.totalFrames; frame++) {
             _container.gotoAndStop(frame);
-            _constructor += "\t\tthis.frame = new Array<FrameDataVO>();\n";
+            _constructor += "\t\tframes = new Array<FrameDataVO>();\n";
 
             _frameList[frame - 1] = new Vector.<FrameDataVO>(_container.numChildren, true);
 
@@ -135,7 +136,7 @@ public class CustomMovieClipParser implements IParseStrategy {
                 bitmapData.draw(child, matrix);
                 TextureList.CreateBorder(bitmapData);
 
-                _constructor += "\n\t\tthis.frameDataVO = new FrameDataVO();\n";
+                _constructor += "\n\t\tframeDataVO = new FrameDataVO();\n";
                 var objectFrameData:FrameDataVO = new FrameDataVO();
                 var oldFrameData:FrameDataVO = findObjectFrameData(bitmapData);
 
@@ -143,12 +144,12 @@ public class CustomMovieClipParser implements IParseStrategy {
                     objectFrameData.name = oldFrameData.name;
                     objectFrameData.parser = oldFrameData.parser;
 
-                    _constructor += "\t\tthis.frameDataVO.addChild(this." + objectFrameData.name + ");\n";
+                    _constructor += "\t\tframeDataVO.addChild(" + objectFrameData.name + ");\n";
                 }
                 else {
                     //parse as new object
                     objectFrameData.name = child.name;
-                    objectFrameData.parser = _parser.createParser(child).execute("this.frameDataVO");
+                    objectFrameData.parser = _parser.createParser(child).execute("frameDataVO");
 
                     for (var line:String in objectFrameData.parser.externalImportsHashList) {
                         addToImports(line);
@@ -161,28 +162,28 @@ public class CustomMovieClipParser implements IParseStrategy {
 
                 objectFrameData.bitmapData = bitmapData;
 
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix = new Matrix();\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.a = " + child.transform.matrix.a + ";\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.b = " + child.transform.matrix.b + ";\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.c = " + child.transform.matrix.c + ";\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.d = " + child.transform.matrix.d + ";\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.tx = " + child.transform.matrix.tx + ";\n";
-                _constructor += "\t\tthis.frameDataVO.transformationMatrix.ty = " + child.transform.matrix.ty + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix = new Matrix();\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.a = " + child.transform.matrix.a + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.b = " + child.transform.matrix.b + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.c = " + child.transform.matrix.c + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.d = " + child.transform.matrix.d + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.tx = " + child.transform.matrix.tx + ";\n";
+                _constructor += "\t\tframeDataVO.transformationMatrix.ty = " + child.transform.matrix.ty + ";\n";
                 if (child is Shape || child is Bitmap) {
                     var objectRect:Rectangle = child.getBounds(child);
                     if (objectRect.left != 0 || objectRect.top != 0) {
                         _constructor += "\n";
-                        _constructor += "\t\tthis.frameDataVO.transformationMatrix.tx += " + objectRect.left + ";\n";
-                        _constructor += "\t\tthis.frameDataVO.transformationMatrix.ty += " + objectRect.top + ";\n";
+                        _constructor += "\t\tframeDataVO.transformationMatrix.tx += " + objectRect.left + ";\n";
+                        _constructor += "\t\tframeDataVO.transformationMatrix.ty += " + objectRect.top + ";\n";
                     }
                 }
-                _constructor += "\t\tthis.frameDataVO.alpha = " + child.alpha + ";\n";
+                _constructor += "\t\tframeDataVO.alpha = " + child.alpha + ";\n";
 
                 _frameList[frame - 1][i] = objectFrameData;
-                _constructor += "\t\tthis.frame.push(this.frameDataVO);\n";
+                _constructor += "\t\tframes.push(frameDataVO);\n";
             }
 
-            _constructor += "\n\t\tthis.frameData.addFrame(" + (frame - 1) + ", this.frame);\n";
+            _constructor += "\n\t\tframeData.addFrame(" + (frame - 1) + ", frames);\n";
         }
 
         var sceneCount:int = _container.scenes.length;
@@ -192,10 +193,11 @@ public class CustomMovieClipParser implements IParseStrategy {
                 var labelName:String = label.name;
                 var labelFrame:int = label.frame;
 
-                _constructor += "\n\t\tthis.addLabel(new FrameLabel(\"" + labelName + "\", " + labelFrame + "));\n";
+                _constructor += "\n\t\taddLabel(new FrameLabel(\"" + labelName + "\", " + labelFrame + "));\n";
             }
         }
 
+        _constructor += "\t\tinitFrame();\n";
         _constructor += "\t}\n";
 
         fileStream.writeUTFBytes(toString());
@@ -239,25 +241,29 @@ public class CustomMovieClipParser implements IParseStrategy {
         var constructor:String = new String();
         if (displayObject.alpha != 1) {
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".alpha = " + displayObject.alpha + ";\n";
+            constructor += "\t\t" + displayObject.name + ".alpha = " + displayObject.alpha + ";\n";
         }
         if (displayObject.transform.matrix.a != 1
                 || displayObject.transform.matrix.b != 0
                 || displayObject.transform.matrix.c != 0
                 || displayObject.transform.matrix.d != 1) {
+            var matrixName:String = "mtx" + displayObject.name;
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.a = " + displayObject.transform.matrix.a + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.b = " + displayObject.transform.matrix.b + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.c = " + displayObject.transform.matrix.c + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.d = " + displayObject.transform.matrix.d + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.tx = " + displayObject.transform.matrix.tx + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.ty = " + displayObject.transform.matrix.ty + ";\n";
+            constructor += "\t\tvar " + matrixName + " : Matrix = new Matrix();\n";
+            constructor += "\t\t" + matrixName + ".a = " + displayObject.transform.matrix.a + ";\n";
+            constructor += "\t\t" + matrixName + ".b = " + displayObject.transform.matrix.b + ";\n";
+            constructor += "\t\t" + matrixName + ".c = " + displayObject.transform.matrix.c + ";\n";
+            constructor += "\t\t" + matrixName + ".d = " + displayObject.transform.matrix.d + ";\n";
+            constructor += "\t\t" + matrixName + ".tx = " + displayObject.transform.matrix.tx + ";\n";
+            constructor += "\t\t" + matrixName + ".ty = " + displayObject.transform.matrix.ty + ";\n";
+            constructor += "\t\t" + displayObject.name + ".transform.matrix = " + matrixName + ";\n";
         }
         else if (displayObject.x != 0 || displayObject.y != 0) {
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".x = " + displayObject.x + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".y = " + displayObject.y + ";\n";
+            constructor += "\t\t" + displayObject.name + ".x = " + displayObject.x + ";\n";
+            constructor += "\t\t" + displayObject.name + ".y = " + displayObject.y + ";\n";
         }
+        constructor += "\n\t\t" + displayObject.name + ".name = \"" + displayObject.name + "\";\n";
         return constructor;
     }
 

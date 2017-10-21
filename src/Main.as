@@ -40,15 +40,13 @@ public class Main extends Sprite {
         var outputLog:TextField = new TextField();
         outputLog.multiline = true;
         addChild(outputLog);
-        outputLog.y = _inputField.y + 8;
+        outputLog.y = _inputField.y + _inputField.height + 8;
         outputLog.width = stage.stageWidth;
         outputLog.height = stage.stageHeight - outputLog.y;
 
         Logger.output = outputLog;
 
         addEventListener(KeyboardEvent.KEY_UP, startParsing);
-
-        Logger.trace("Test line");
     }
 
     private function startParsing(event:KeyboardEvent):void {
@@ -80,9 +78,15 @@ public class Main extends Sprite {
         while(!directory.isDirectory) {
             directory = directory.parent;
         }
-        var sourceDirectory:File = directory.resolvePath("generated");
+        var sourceDirectory:File = directory.resolvePath("lib/generated");
         if(sourceDirectory.exists) {
             sourceDirectory.deleteDirectory(true);
+        }
+
+        sourceDirectory = directory.resolvePath("assets/img/atlas/");
+        if(sourceDirectory.exists) {
+            sourceDirectory.deleteDirectory(true);
+            sourceDirectory.createDirectory();
         }
 
         new FlashStageParser(directory.nativePath + "\\").exportFromMC(loader.content);

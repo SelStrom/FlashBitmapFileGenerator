@@ -120,7 +120,9 @@ public class FlashStageParser {
             return new GraphicsParser(displayObject, _textureAtlasVisitor);
         } else if (displayObject is Bitmap) {
             return new GraphicsParser(displayObject, _textureAtlasVisitor);
-        } //TODO обработка MorphShape
+        } else if (Util.getName(displayObject) == "MorphShape") {
+            return new GraphicsParser(displayObject, _textureAtlasVisitor);
+        }
         return new UnknownTypeParser(displayObject);
     }
 

@@ -16,7 +16,7 @@ public class Variable {
     }
 
     public function instaniate():String {
-        return "this." + name + " = new " + type + "();";
+        return name + " = new " + type + "();";
     }
 }
 }

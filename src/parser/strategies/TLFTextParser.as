@@ -39,19 +39,19 @@ public class TLFTextParser extends AbstractParseStrategy {
     }
 
     private function createTextData(name:String):void {
-        _externalConstructor += "\t\tthis." + name + ".text = \"" + _container.text + "\";\n";
-        _externalConstructor += "\t\tthis." + name + ".textColor = 0x" + _container.textColor + ";\n";
-        _externalConstructor += "\t\tthis." + name + ".autoSize = \"" + _container.autoSize + "\";\n";
-        _externalConstructor += "\t\tthis." + name + ".width = " + _container.width + ";\n";
-        _externalConstructor += "\t\tthis." + name + ".height = " + _container.height + ";\n";
+        _externalConstructor += "\t\t" + name + ".text = \"" + _container.text + "\";\n";
+        _externalConstructor += "\t\t" + name + ".textColor = 0x" + _container.textColor + ";\n";
+        _externalConstructor += "\t\t" + name + ".autoSize = \"" + _container.autoSize + "\";\n";
+        _externalConstructor += "\t\t" + name + ".width = " + _container.width + ";\n";
+        _externalConstructor += "\t\t" + name + ".height = " + _container.height + ";\n";
 
         var textFormat:String = name + "TextFormat";
 
         _externalConstructor += "\n\t\tvar " + textFormat + ":TextFormat = new TextFormat();\n";
-        _externalConstructor += "\t\tthis." + textFormat + ".font = \"" + _container.getTextFormat().font + "\";\n";
-        _externalConstructor += "\t\tthis." + textFormat + ".size = " + _container.getTextFormat().size + ";\n";
-        _externalConstructor += "\t\tthis." + textFormat + ".italic = " + _container.getTextFormat().italic + ";\n";
-        _externalConstructor += "\t\tthis." + textFormat + ".bold = " + _container.getTextFormat().bold + ";\n";
+        _externalConstructor += "\t\t" + textFormat + ".font = \"" + _container.getTextFormat().font + "\";\n";
+        _externalConstructor += "\t\t" + textFormat + ".size = " + _container.getTextFormat().size + ";\n";
+        _externalConstructor += "\t\t" + textFormat + ".italic = " + _container.getTextFormat().italic + ";\n";
+        _externalConstructor += "\t\t" + textFormat + ".bold = " + _container.getTextFormat().bold + ";\n";
     }
 
 }

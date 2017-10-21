@@ -70,22 +70,24 @@ public class BitmapDataLibraryContext {
         addToImports("import openfl.display.BitmapData;");
         addToImports("import openfl.geom.Rectangle;");
         addToImports("import haxe.ds.StringMap;");
+        addToImports("import openfl.geom.Point;");
+        addToImports("import openfl.utils.Assets;");
+        addToImports("import openfl.errors.Error;");
 
         for (var i:int = 0; i < bitmaps.length; i++) {
             var bitmapData:BitmapData = bitmaps[i];
             addAtlasVariable(new Variable("bitmapData" + i.toString(), "BitmapData"));
             saveAtlas("bitmapData" + i, bitmapData);
         }
-        addVariable(new Variable("bitmapDataMap", "StringMap<BitmapData>"));
+        addVariable(new Variable("_bitmapDataMap", "StringMap<BitmapData>"));
 
         _constructor += "\n\tpublic function new() {\n";
-        _constructor += "\t\tsuper();\n\n";
 
         for each (var line:Variable in _variables) {
             _constructor += "\t\t" + line.instaniate() + "\n";
         }
         for each (line in _atlasVariables) {
-            _constructor += "\t\tthis." + line.name + " = Assets.getBitmapData(\"atlas/" + line.name + ".png\");\n";
+            _constructor += "\t\t" + line.name + " = Assets.getBitmapData(\"atlas/" + line.name + ".png\");\n";
         }
 
         for each(var info:BitmapInfo in bitmapInfoList) {
@@ -130,9 +132,18 @@ public class BitmapDataLibraryContext {
             body += "\tprivate " + line.definite() + "\n";
         }
 
+        body += "\n\tprivate static var _instance : BitmapDataLibrary;\n";
+
+        body += "\n\tpublic static function getInstance():BitmapDataLibrary {\n" +
+                "\t\tif(_instance == null) {\n" +
+                "\t\t\t_instance = new BitmapDataLibrary();\n" +
+                "\t\t}\n" +
+                "\t\treturn _instance;\n"+
+                "\t}\n";
+
         body += _constructor;
 
-        body += "\n\tpublic static function getBitmapDataByName(name:String):BitmapData {\n" +
+        body += "\n\tpublic function getBitmapDataByName(name:String):BitmapData {\n" +
                 "\t\tif(_bitmapDataMap.exists(name)) {\n" +
                 "\t\t\treturn _bitmapDataMap.get(name);\n" +
                 "\t\t} else {\n" +
@@ -140,10 +151,10 @@ public class BitmapDataLibraryContext {
                 "\t\t}\n" +
                 "\t}\n";
 
-        body += "\n\tprivate function insertBitmapData(atlasName:String, textureName:String, x:Int, y:Int, width:Int, height:Int):Void {\n" +
+        body += "\n\tprivate function insertBitmapData(atlas:BitmapData, textureName:String, x:Int, y:Int, width:Int, height:Int):Void {\n" +
                 "\t\tvar bitmapData:BitmapData = new BitmapData(width, height, true, 0x00FFFFFF);\n" +
-                "\t\tatlasName.copyPixels(bitmapData, new Rectangle(0, 0, width, height), new Point(x,y));\n" +
-                "\t\tbitmapDataMap.set(textureName, bitmapData);\n" +
+                "\t\tbitmapData.copyPixels(atlas, new Rectangle(x, y, width, height), new Point(0,0));\n" +
+                "\t\t_bitmapDataMap.set(textureName, bitmapData);\n" +
                 "\t}\n";
 
         body += "}\n";

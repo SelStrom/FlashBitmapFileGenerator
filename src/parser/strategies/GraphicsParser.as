@@ -33,19 +33,18 @@ public class GraphicsParser implements IParseStrategy {
         _visitor = visitor;
     }
 
-    private function addToImports(line:String, includeExternal:Boolean = false):void {
-        if (includeExternal) {
-            _externalImportsHashList[line] = "";
-        }
+    private function addToImports(line:String):void {
+        _externalImportsHashList[line] = "";
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import openfl.display.Bitmap;", true);
-//        addToImports("import BitmapDataLibrary;", true);
+        addToImports("import openfl.display.Bitmap;");
+        addToImports("import openfl.geom.Matrix;");
+//        addToImports("import BitmapDataLibrary;");
 
         var info:BitmapInfo = _visitor.visitGraphics(_displayObject);
 
-        _externalConstructor = "\n\t\tvar " + _displayObject.name + ": Bitmap = new Bitmap(BitmapDataLibrary.getBitmapDataByName(\"" + info._name + "\"));\n";
+        _externalConstructor = "\n\t\tvar " + _displayObject.name + ": Bitmap = new Bitmap(BitmapDataLibrary.getInstance().getBitmapDataByName(\"" + info._name + "\"));\n";
         _externalConstructor += "\t\t" + externalContext + ".addChild(" + _displayObject.name + ");\n";
         _externalConstructor += createConstructorData(_displayObject);
 
@@ -54,38 +53,42 @@ public class GraphicsParser implements IParseStrategy {
 
     public function createConstructorData(displayObject:DisplayObject):String {
         var name:String = displayObject.name;
-        
+        var matrixName:String = "mtx" + displayObject.name;
+
         var constructor:String = new String();
+        constructor += "\n\t\tvar " + matrixName + " : Matrix = new Matrix();\n";
+
         if (displayObject.alpha != 1) {
             constructor += "\n";
-            constructor += "\t\tthis." + name + ".alpha = " + displayObject.alpha + ";\n";
+            constructor += "\t\t" + name + ".alpha = " + displayObject.alpha + ";\n";
         }
         if (displayObject.transform.matrix.a != 1
                 || displayObject.transform.matrix.b != 0
                 || displayObject.transform.matrix.c != 0
                 || displayObject.transform.matrix.d != 1) {
             constructor += "\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.a = " + displayObject.transform.matrix.a + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.b = " + displayObject.transform.matrix.b + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.c = " + displayObject.transform.matrix.c + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.d = " + displayObject.transform.matrix.d + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.tx = " + displayObject.transform.matrix.tx + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.ty = " + displayObject.transform.matrix.ty + ";\n";
+            constructor += "\t\t" + matrixName + ".a = " + displayObject.transform.matrix.a + ";\n";
+            constructor += "\t\t" + matrixName + ".b = " + displayObject.transform.matrix.b + ";\n";
+            constructor += "\t\t" + matrixName + ".c = " + displayObject.transform.matrix.c + ";\n";
+            constructor += "\t\t" + matrixName + ".d = " + displayObject.transform.matrix.d + ";\n";
+            constructor += "\t\t" + matrixName + ".tx = " + displayObject.transform.matrix.tx + ";\n";
+            constructor += "\t\t" + matrixName + ".ty = " + displayObject.transform.matrix.ty + ";\n";
         }
         else if (displayObject.x != 0 || displayObject.y != 0) {
             constructor += "\n";
-            constructor += "\t\tthis." + name + ".x = " + displayObject.x + ";\n";
-            constructor += "\t\tthis." + name + ".y = " + displayObject.y + ";\n";
+            constructor += "\t\t" + name + ".x = " + displayObject.x + ";\n";
+            constructor += "\t\t" + name + ".y = " + displayObject.y + ";\n";
         }
 
         var objectRect:Rectangle = displayObject.getBounds( displayObject );
         if( objectRect.left != 0 || objectRect.top != 0 )
         {
             constructor += "\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.tx += " + objectRect.left + ";\n";
-            constructor += "\t\tthis." + name + ".transform.matrix.ty += " + objectRect.top + ";\n";
+            constructor += "\t\t" + matrixName + ".tx += " + objectRect.left + ";\n";
+            constructor += "\t\t" + matrixName + ".ty += " + objectRect.top + ";\n";
         }
-
+        constructor += "\t\t" + displayObject.name + ".transform.matrix = " + matrixName + ";\n";
+        constructor += "\n\t\t" + displayObject.name + ".name = \"" + displayObject.name + "\";\n";
         return constructor;
     }
 }

@@ -35,10 +35,8 @@ public class SpriteParser implements IParseStrategy {
         _container = container;
     }
 
-    private function addToImports(line:String, includeExternal:Boolean = false):void {
-        if (includeExternal) {
-            _externalImportsHashList[line] = "";
-        }
+    private function addToImports(line:String):void {
+        _externalImportsHashList[line] = "";
     }
 
     private function addToVariables(line:String):void {
@@ -46,11 +44,12 @@ public class SpriteParser implements IParseStrategy {
     }
 
     public function execute(externalContext:String = "this"):IParseStrategy {
-        addToImports("import openfl.display.Sprite;", true);
+        addToImports("import openfl.display.Sprite;");
+        addToImports("import openfl.geom.Matrix;");
 
         addToVariables("var " + _container.name + ":" + type + " = new " + type + "();");
 
-        _externalConstructor = "\n\t\t"+externalContext+".addChild(this." + _container.name + ");\n";
+        _externalConstructor = "\n\t\t"+externalContext+".addChild(" + _container.name + ");\n";
         _externalConstructor += createConstructorData(_container);
 
         for (var i:int = 0; i < _container.numChildren; ++i) {
@@ -73,25 +72,29 @@ public class SpriteParser implements IParseStrategy {
         var constructor:String = new String();
         if (displayObject.alpha != 1) {
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".alpha = " + displayObject.alpha + ";\n";
+            constructor += "\t\t" + displayObject.name + ".alpha = " + displayObject.alpha + ";\n";
         }
         if (displayObject.transform.matrix.a != 1
                 || displayObject.transform.matrix.b != 0
                 || displayObject.transform.matrix.c != 0
                 || displayObject.transform.matrix.d != 1) {
+            var matrixName:String = "mtx" + displayObject.name;
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.a = " + displayObject.transform.matrix.a + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.b = " + displayObject.transform.matrix.b + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.c = " + displayObject.transform.matrix.c + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.d = " + displayObject.transform.matrix.d + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.tx = " + displayObject.transform.matrix.tx + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".transform.matrix.ty = " + displayObject.transform.matrix.ty + ";\n";
+            constructor += "\t\tvar " + matrixName + " : Matrix = new Matrix();\n";
+            constructor += "\t\t" + matrixName + ".a = " + displayObject.transform.matrix.a + ";\n";
+            constructor += "\t\t" + matrixName + ".b = " + displayObject.transform.matrix.b + ";\n";
+            constructor += "\t\t" + matrixName + ".c = " + displayObject.transform.matrix.c + ";\n";
+            constructor += "\t\t" + matrixName + ".d = " + displayObject.transform.matrix.d + ";\n";
+            constructor += "\t\t" + matrixName + ".tx = " + displayObject.transform.matrix.tx + ";\n";
+            constructor += "\t\t" + matrixName + ".ty = " + displayObject.transform.matrix.ty + ";\n";
+            constructor += "\t\t" + displayObject.name + ".transform.matrix = " + matrixName + ";\n";
         }
         else if (displayObject.x != 0 || displayObject.y != 0) {
             constructor += "\n";
-            constructor += "\t\tthis." + displayObject.name + ".x = " + displayObject.x + ";\n";
-            constructor += "\t\tthis." + displayObject.name + ".y = " + displayObject.y + ";\n";
+            constructor += "\t\t" + displayObject.name + ".x = " + displayObject.x + ";\n";
+            constructor += "\t\t" + displayObject.name + ".y = " + displayObject.y + ";\n";
         }
+        constructor += "\n\t\t" + displayObject.name + ".name = \"" + displayObject.name + "\";\n";
         return constructor;
     }
 }
